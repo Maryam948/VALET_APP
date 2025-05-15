@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:valet_app/pages/checkout.dart';
 import 'package:valet_app/pages/profile.dart';
 import 'package:video_player/video_player.dart';
@@ -58,27 +58,29 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   bool showSecondWidget = false;
-  File? _videoFile;
-  VideoPlayerController? _videoController;
-
-  Future<void> _pickVideo() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      _videoFile = File(pickedFile.path);
-      _videoController = VideoPlayerController.file(_videoFile!)
-        ..initialize().then((_) {
-          setState(() {});
-          _videoController!.play();
-        });
-    }
-  }
+  VideoPlayerController? _videoController; // Make it nullable
 
   @override
   void dispose() {
     _videoController?.dispose();
     super.dispose();
+  }
+
+  // Method to allow the user to pick a video file
+  void _pickVideo() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.video);
+    if (result != null && result.files.single.path != null) {
+      File file = File(result.files.single.path!);
+
+      setState(() {
+        _videoController = VideoPlayerController.file(file)
+          ..initialize().then((_) {
+            setState(() {});
+            _videoController!.play();
+            _videoController!.setLooping(true);
+          });
+      });
+    }
   }
 
   @override
@@ -109,7 +111,7 @@ class _HomeContentState extends State<HomeContent> {
                 ),
                 const SizedBox(height: 30),
                 GestureDetector(
-                  onTap: _pickVideo,
+                  onTap: _pickVideo,  
                   child: Container(
                     width: double.infinity,
                     height: 234,
@@ -120,7 +122,7 @@ class _HomeContentState extends State<HomeContent> {
                             aspectRatio: _videoController!.value.aspectRatio,
                             child: VideoPlayer(_videoController!),
                           )
-                        : const Text("Tap to upload video", style: TextStyle(color: Colors.white)),
+                        : const Text("Tap to select video"),  
                   ),
                 ),
                 const SizedBox(height: 81),

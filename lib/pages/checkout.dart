@@ -23,33 +23,14 @@ class Checkout extends StatelessWidget {
                     fontSize: 22),
               ),
               const SizedBox(height: 20),
-
-              // ✅ Start & End Row
-              const Row(
-                children: [
-                  SizedBox(width: 11),
-                  Text("Start",
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xffD9D2E2))),
-                  SizedBox(width: 251),
-                  Text("End ",
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xffD9D2E2))),
-                ],
-              ),
-
               Expanded(
                 child: ListView(
                   children: const [
                     HistoryItem(
-                      time: "10:00 AM",
-                      date: "Tue,Dec 24",
-                      endtime: "12:00 PM",
-                      enddate: "Tue,Dec 24",
+                      time: "22:00",
+                      date: "Tue, Dec 24",
+                      endtime: "01:00",
+                      enddate: "Wed, Dec 25",
                     ),
                   ],
                 ),
@@ -78,76 +59,109 @@ class HistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ حساب الفرق بين الوقتين
-    final DateFormat format = DateFormat("h:mm a");
-    final DateTime start = format.parse(time.trim());
-    final DateTime end = format.parse(endtime.trim());
+    final DateFormat format = DateFormat("HH:mm");
+    final DateTime now = DateTime.now();
+
+    DateTime start = format.parse(time.trim());
+    DateTime end = format.parse(endtime.trim());
+
+    start = DateTime(now.year, now.month, now.day, start.hour, start.minute);
+    end = DateTime(now.year, now.month, now.day, end.hour, end.minute);
+
+    if (end.isBefore(start)) {
+      end = end.add(const Duration(days: 1));
+    }
 
     final Duration duration = end.difference(start);
-    final int hours = duration.inMinutes ~/ 60;
-    
+    final int hours = (duration.inMinutes / 60).ceil();
     final String durationText = "$hours hour${hours == 1 ? '' : 's'} parking";
-    final int cost = hours * 10; 
-    final int serviceFee = 5;   
-    final int totalCost = cost + serviceFee; 
-
+     
+    final int cost = hours * 10;
+   
+    final int serviceFee = hours <= 1 ? 0 : ((hours - 1) / 2).ceil() * 5;
+    final int totalCost = cost + serviceFee;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Start / End Display
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Text(
-                time,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Color(0xff2D0C57)),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Start",
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xffD9D2E2)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  time,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Color(0xff2D0C57)),
+                ),
+                Text(
+                  date,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xffD9D2E2)),
+                ),
+              ],
             ),
-            const Text("→",
-                style: TextStyle(
-                    fontSize: 24,
-                    color: Color(0xffD9D2E2),
-                    fontWeight: FontWeight.bold)),
-            Expanded(
-              child: Text(
-                endtime,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Color(0xff2D0C57)),
-              ),
+            const Text(
+              "→",
+              style: TextStyle(
+                  fontSize: 24,
+                  color: Color(0xffD9D2E2),
+                  fontWeight: FontWeight.bold),
             ),
-          ],
-        ),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                date,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Color(0xffD9D2E2)),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                enddate,
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Color(0xffD9D2E2)),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 60),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start, 
+              children: [
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 6,
+                    ),
+                    const Text(
+                      "End",
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xffD9D2E2)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
 
+                Text(
+                  endtime,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Color(0xff2D0C57)),
+                ),
+                Text(
+                  enddate,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xffD9D2E2)),
+                ),
+              ],
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 60),
+ 
         Container(
           padding: const EdgeInsets.fromLTRB(15, 30, 15, 20),
           decoration: BoxDecoration(
@@ -159,106 +173,119 @@ class HistoryItem extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                       Text(
-                      durationText,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff2D0C57),
-                      ),
+                  Text(
+                    durationText,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff2D0C57),
                     ),
-               
-               
-                    Text("$cost EGP",style:TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff624881),
-                    ) ,),
-                  
+                  ),
+                  Text(
+                    "$cost EGP",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff624881),
+                    ),
+                  ),
                 ],
               ),
-              SizedBox(
-                height: 20,
-              ),
-                          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-                   Text("Service fee",
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xff2D0C57),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Service fee",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff2D0C57),
+                    ),
                   ),
-                ),
- 
- 
-                Text("5 EGP",style:TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xff624881),
-                ) ,),
-            ],
-                          ),
-                                        SizedBox(
-                height: 20,
-              ),
-                          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-                   Text("Total",
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xff2D0C57),
+                  Text(
+                    "$serviceFee EGP", 
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff624881),
+                    ),
                   ),
-                ),
- 
- 
-                Text("$totalCost EGP",style:TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xff624881),
-                ) ,),
-            ],
-                          ),
-
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Total",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff2D0C57),
+                    ),
+                  ),
+                  Text(
+                    "$totalCost EGP", 
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff624881),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
-        SizedBox(
-          height: 30,
+
+        const SizedBox(height: 30),
+
+        const Text(
+          "Payment method",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            fontFamily: 'Inter',
+          ),
         ),
-        Text("Payment method",
-        style:TextStyle(fontWeight: FontWeight.bold,fontSize: 22,fontFamily: 'Inter'),
-        
-        ),
-        SizedBox(
-          height: 15,
-        ),
+        const SizedBox(height: 15),
+ 
         Row(
           children: [
-            Image(image: AssetImage("images/credit-card.png"), ),
-            SizedBox(width: 15,),
-            Text("Credit Card",style: TextStyle(color: Color(0xff2D0C57),fontSize: 17.1,fontFamily: 'Inter',fontWeight: FontWeight.bold),) ,
-              Spacer(),
-            ArrowIcon2(routeName:"/creditcard"),
-
+            const Image(image: AssetImage("images/credit-card.png")),
+            const SizedBox(width: 15),
+            const Text(
+              "Credit Card",
+              style: TextStyle(
+                  color: Color(0xff2D0C57),
+                  fontSize: 17.1,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
+            ArrowIcon2(routeName: "/creditcard"),
           ],
         ),
-                 
-        SizedBox(
-          height: 15,
-        ),
+        const SizedBox(height: 15),
+ 
         Row(
           children: [
-            Image(image: AssetImage("images/Vector(11).png"), ),
-            SizedBox(width: 15,),
-            Text("Internet Banking",style: TextStyle(color: Color(0xff2D0C57),fontSize: 17.1,fontFamily: 'Inter',fontWeight: FontWeight.bold),) ,
-              Spacer(),
+            const Image(image: AssetImage("images/Vector(11).png")),
+            const SizedBox(width: 15),
+            const Text(
+              "Internet Banking",
+              style: TextStyle(
+                  color: Color(0xff2D0C57),
+                  fontSize: 17.1,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold),
+            ),
+            const Spacer(),
             ArrowIcon2(routeName: "/bank"),
           ],
-        )
+        ),
       ],
     );
   }
-}
+}   

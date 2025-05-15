@@ -12,7 +12,7 @@ dependencies:
     sdk: flutter
   intl: ^0.18.1
   video_player: ^2.7.0
-  image_picker: ^1.0.7
+  file_picker: ^10.1.9
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -24,6 +24,7 @@ flutter:
   uses-material-design: true
   assets:
     - images/
+    - video/parking_1920_1080.mp4
   fonts:
     - family: Inter-Italic
       fonts:
@@ -34,3 +35,6 @@ flutter:
     - family: Inter
       fonts:
         - asset: fonts/Inter-VariableFont_opsz,wght.ttf
+
+
+
