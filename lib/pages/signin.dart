@@ -39,7 +39,7 @@ class Signin extends StatelessWidget {
                   SizedBox(
                     height:15 ,
                   ),
-                  Text("LOGIN",style: TextStyle(color: Colors.black,fontFamily: 'Inter',fontSize: 32),
+                  Text("SIGNIN",style: TextStyle(color: Colors.black,fontFamily: 'Inter',fontSize: 32),
                   ),
                   SizedBox(
                     height: 20,
